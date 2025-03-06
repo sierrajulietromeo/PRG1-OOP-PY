@@ -1,166 +1,176 @@
-from oop import PRIORITY, valid_integer, validate_priority, todays_date, Task, ToDo
-import re
 import pytest
 from datetime import datetime
+from oop import PRIORITY, valid_positive_integer, validate_priority, Todo, todays_date, TaskList
 
 # pip install pytest in the terminal
 # pytest -v oop_test.py
+# pytest -v oop_test.py::test_valid_positive_integer (runs a specific test)
 
 
-def test_01_valid_integer_operations():
-    # Test positive integers and their string representations
-    for i in range(21):
-        assert valid_integer(i) == True
-        assert valid_integer(str(i)) == True
+# Test validPositiveInteger
+def test_valid_positive_integer():
+    assert valid_positive_integer(10) == True
+    assert valid_positive_integer('10') == True
+    assert valid_positive_integer(25) == True
+    assert valid_positive_integer('25') == True
+    assert valid_positive_integer(100) == True
+    assert valid_positive_integer('100') == True
+    assert valid_positive_integer(3) == True
+    assert valid_positive_integer('3') == True
 
-    # Test negative integers and their string representations
-    for i in range(-20, 0):
-        assert valid_integer(i) == False
-        assert valid_integer(str(i)) == False
+    assert valid_positive_integer(-100) == False
+    assert valid_positive_integer(-25) == False
+    assert valid_positive_integer(-0) == False
+    assert valid_positive_integer(0.0) == False
+    assert valid_positive_integer(1.0) == True
 
-    # Test zero
-    for i in [0, -0, +0]:  
-        assert valid_integer(i) == True
+    # Test invalid cases
+    assert valid_positive_integer(1.2) == False
+    assert valid_positive_integer(-1.0) == False
+    assert valid_positive_integer('-0') == False
+    assert valid_positive_integer('A') == False
+    assert valid_positive_integer('0A') == False
+    assert valid_positive_integer('1.0') == False
+    assert valid_positive_integer('') == False
+    assert valid_positive_integer(' ') == False
+    assert valid_positive_integer('.') == False
 
-    # Test invalid inputs (non-numeric characters, empty strings, etc.)
-    for i in ['-0', 'A', '0A', '1.0', 'A0', '', ' ', '.']:
-        assert valid_integer(i) == False
+# Test validatePriority
+def test_validate_priority():
+    # Test valid priorities using PRIORITY dictionary
+    assert validate_priority(PRIORITY["LOW"]) == PRIORITY["LOW"]
+    assert validate_priority(PRIORITY["MEDIUM"]) == PRIORITY["MEDIUM"]
+    assert validate_priority(PRIORITY["HIGH"]) == PRIORITY["HIGH"]
+    assert validate_priority(PRIORITY["URGENT"]) == PRIORITY["URGENT"]
 
+    # Test invalid priorities
+    assert validate_priority(0) == PRIORITY["LOW"]
+    assert validate_priority(2) == PRIORITY["LOW"]
+    assert validate_priority(4) == PRIORITY["LOW"]
+    assert validate_priority(6) == PRIORITY["LOW"]
+    assert validate_priority(8) == PRIORITY["LOW"]
+    assert validate_priority('A') == PRIORITY["LOW"]
+    assert validate_priority('A0') == PRIORITY["LOW"]
+    assert validate_priority('0A') == PRIORITY["LOW"]
+    assert validate_priority('.') == PRIORITY["LOW"]
+    assert validate_priority(' ') == PRIORITY["LOW"]
 
-def test_02_valid_priority_operations():
-    # Test valid priorities (no change expected)
-    for i in [1, 3, 5, 7]:
-        assert validate_priority(i) == i
-        assert validate_priority(str(i)) == i 
+# Test todaysDate
+def test_todays_date():
+    # Get the current system time
+    current_time = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+    assert todays_date() == current_time
 
-    # Test invalid priorities (default to 1)
-    for i in [0, 2, 4, 6, 8]:
-        assert validate_priority(i) == 1
-        assert validate_priority(str(i)) == 1
+def test_todo_private_attributes():
+    # Test that private attributes exist
+    todo = Todo("T1", PRIORITY["LOW"])
+    assert hasattr(todo, "_added")
+    assert hasattr(todo, "_title")
+    assert hasattr(todo, "_priority")
 
-    # Test invalid inputs (non-numeric characters)
-    for i in ['A', 'A0', '0A', '.', ' ']:
-        assert validate_priority(i) == 1
-        assert validate_priority(str(i)) == 1
+def test_todo_added_property():
+    # Test that added is a read-only property and has the correct format
+    todo = Todo("T1", PRIORITY["LOW"])
+    assert isinstance(todo.added, str)  # Should be a string in the correct format
 
+    # Verify that added is read-only by attempting to set it
+    with pytest.raises(AttributeError):
+        todo.added = "02/01/2024 00:00:00"
 
-def test_03_valid_datetime_now_operations():
-    # Get the current date and time
-    now = datetime.now()
+def test_todo_title_property():
+    # Test that title is a read-only property
+    todo = Todo("T1", PRIORITY["LOW"])
+    assert todo.title == "T1"  # Should return the correct title
 
-    # Format the date and time string
-    expected_date_str = now.strftime("%d/%m/%Y")
-    expected_time_str = now.strftime("%H:%M:%S")
-    expected_now = expected_date_str + " " + expected_time_str
+    # Verify that title is read-only by attempting to set it
+    with pytest.raises(AttributeError):
+        todo.title = "NEW TITLE"
 
-    actual_now = todays_date()
-    assert actual_now == expected_now
+def test_todo_priority_property():
+    # Test priority getter and setter using PRIORITY dictionary
+    todo = Todo("T1", PRIORITY["LOW"])
+    assert todo.priority == PRIORITY["LOW"]
 
+    # Test setting priority to valid values
+    todo.priority = PRIORITY["HIGH"]
+    assert todo.priority == PRIORITY["HIGH"]
 
-def test_04_check_task_attributes():
-    now = datetime.now()
-    formatted_now = now.strftime("%d/%m/%Y %H:%M:%S")
+    # Test setting priority to invalid values (should default to LOW)
+    todo.priority = 0
+    assert todo.priority == PRIORITY["LOW"]
 
-    # Create a Task object 
-    task = Task('T1', PRIORITY['LOW']) 
+    todo.priority = 10
+    assert todo.priority == PRIORITY["LOW"]
 
-    # Assert task attributes
-    assert task.added == formatted_now  # Check if _added matches the formatted datetime
-    assert task.title == 'T1'           # Check if _title is 'T1'
-    assert task.priority == PRIORITY['LOW']  # Check if _priority is PRIORITY['LOW']
+def test_tasklist_methods_exist():
+    # Test that TaskList has the required methods
+    task_list = TaskList()
+    assert hasattr(task_list, "add")
+    assert hasattr(task_list, "remove")
+    assert hasattr(task_list, "list")
+    assert hasattr(task_list, "task")
 
+def test_tasklist_add_and_list_tasks():
+    # Test adding tasks and listing them
+    task_list = TaskList()
+    todo1 = Todo("ACME T1", PRIORITY["LOW"])
+    todo2 = Todo("ACME T2", PRIORITY["MEDIUM"])
+    todo3 = Todo("ACME T3", PRIORITY["MEDIUM"])
+    todo4 = Todo("ACME T4", PRIORITY["HIGH"])
 
-def test_05_check_task_class_rw_accessors():
-    x = Task('T1', PRIORITY['LOW'] )  # Create a Task object (You need to implement the Task class)
+    assert task_list.add(todo1) == 1
+    assert task_list.add(todo2) == 2
+    assert task_list.add(todo3) == 3
+    assert task_list.add(todo4) == 4
 
-    # Check 'added' property
-    added_descriptor = Task.added.fget  # Get the getter function for 'added'
-    assert callable(added_descriptor)    # Assert it's a function (getter exists)
-    with pytest.raises(AttributeError):  # Expect setting 'added' to raise an error
-        x.added = "new value"
+    # Verify the list of tasks
+    task_list_items = task_list.list()
+    assert len(task_list_items) == 4
+    assert task_list_items[0][1] == "ACME T1"
+    assert task_list_items[1][1] == "ACME T2"
+    assert task_list_items[2][1] == "ACME T3"
+    assert task_list_items[3][1] == "ACME T4"
 
-    # Check 'title' property
-    title_descriptor = Task.title.fget   # Get the getter function for 'title'
-    assert callable(title_descriptor)    # Assert it's a function (getter exists)
-    with pytest.raises(AttributeError):  # Expect setting 'title' to raise an error
-        x.title = "new title"
+def test_tasklist_remove_task():
+    # Test removing a task
+    task_list = TaskList()
+    todo1 = Todo("ACME T1", PRIORITY["LOW"])
+    todo2 = Todo("ACME T2", PRIORITY["MEDIUM"])
+    todo3 = Todo("ACME T3", PRIORITY["MEDIUM"])
+    todo4 = Todo("ACME T4", PRIORITY["HIGH"])
 
-    # Check 'priority' property
-    priority_descriptor = Task.priority   # Get the property descriptor for 'priority'
-    assert callable(priority_descriptor.fget)  # Assert it has a getter function
-    assert callable(priority_descriptor.fset)  # Assert it has a setter function
+    task_list.add(todo1)
+    task_list.add(todo2)
+    task_list.add(todo3)
+    task_list.add(todo4)
 
+    # Remove a task and verify
+    assert task_list.remove("ACME T4") == True
+    assert len(task_list.list()) == 3
 
-def test_06_task_class_behaviour():
-    task = Task('T1', PRIORITY['LOW']) 
+    # Try to remove a non-existent task
+    assert task_list.remove("ACME T5") == False
 
-    # Test initial priority
-    assert task.priority == PRIORITY['LOW']
+def test_tasklist_task_access_and_modification():
+    # Test accessing and modifying a task
+    task_list = TaskList()
+    todo1 = Todo("ACME T1", PRIORITY["LOW"])
+    todo2 = Todo("ACME T2", PRIORITY["MEDIUM"])
 
-    # Test setting a valid high priority
-    task.priority = PRIORITY['HIGH']
-    assert task.priority == PRIORITY['HIGH']
+    task_list.add(todo1)
+    task_list.add(todo2)
 
-    # Test setting an invalid low priority (should default to LOW)
-    task.priority = 0 
-    assert task.priority == PRIORITY['LOW']
+    # Access and modify a task
+    assert task_list.task("ACME T2").priority == PRIORITY["MEDIUM"]
+    task_list.task("ACME T2").priority = PRIORITY["URGENT"]
+    assert task_list.task("ACME T2").priority == PRIORITY["URGENT"]
 
-    # Test setting an invalid high priority (should default to LOW)
-    task.priority = 10 
-    assert task.priority == PRIORITY['LOW']
+def test_tasklist_task_not_found():
+    # Test accessing a non-existent task
+    task_list = TaskList()
+    todo1 = Todo("ACME T1", PRIORITY["LOW"])
+    task_list.add(todo1)
 
-
-def test_07_check_todo_class_functions():
-    todo = ToDo()  # Create a ToDo object
-
-    # Check if 'add' is a function
-    assert callable(todo.add)
-
-    # Check if 'remove' is a function
-    assert callable(todo.remove)
-
-    # Check if 'list' is a function
-    assert callable(todo.list)
-
-    # Check if 'task' is a function
-    assert callable(todo.task)
-
-
-def test_08_todo_class_behaviour_add_list():
-    tasks = ToDo()
-    
-    # Add tasks and check returned values (expected to be the current size of the ToDo list)
-    assert tasks.add(Task('ACME T1', PRIORITY['LOW'])) == 1
-    assert tasks.add(Task('ACME T2', PRIORITY['MEDIUM'])) == 2
-    assert tasks.add(Task('ACME T3', PRIORITY['MEDIUM'])) == 3
-    assert tasks.add(Task('ACME T4', PRIORITY['HIGH'])) == 4
-
-    # Test list() method
-    task_list = tasks.list()
-    assert len(task_list) == 4          # Check the number of tasks in the list
-    assert len(task_list[0]) == 3     # Check the number of attributes per task (assuming it's 3: added_date, title, priority)
-
-    # Test remove() method
-    assert not tasks.remove('ACME T5')   # Removing a non-existent task should return False
-    assert tasks.remove('ACME T4')      # Removing an existing task should return True
-
-    # Test list() again after removal
-    task_list = tasks.list()
-    assert len(task_list) == 3           # Check the number of tasks after removal
-    assert task_list[1][1] == 'ACME T2'  # Check the title of the task at index 1
-
-
-def test_09_todo_class_task_access():
-    tasks = ToDo()
-    
-    # Add tasks and check returned values
-    assert tasks.add(Task('ACME T1', PRIORITY['LOW'])) == 1
-    assert tasks.add(Task('ACME T2', PRIORITY['MEDIUM'])) == 2
-
-    # Test accessing a non-existent task (expecting an exception)
-    with pytest.raises(Exception, match="Task 'ACME T9' Not Found"):
-        tasks.task('ACME T9')
-
-    # Test modifying a task's priority through the ToDo object
-    tasks.task('ACME T2').priority = PRIORITY['URGENT']
-    assert tasks.task('ACME T2').priority == PRIORITY['URGENT']
+    # Verify that accessing a non-existent task raises an error
+    with pytest.raises(ValueError, match="Task 'ACME T9' Not Found"):
+        task_list.task("ACME T9")
