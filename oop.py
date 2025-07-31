@@ -5,6 +5,8 @@ PRIORITY = { "LOW": 1, "MEDIUM": 3, "HIGH": 5, "URGENT": 7 }
 
 def valid_positive_integer(value): # value can be a string or an integer
   try:
+    if isinstance(value, float):
+      return False
     num = int(value)
     return num > 0
   except:
@@ -12,13 +14,14 @@ def valid_positive_integer(value): # value can be a string or an integer
 
 
 def validate_priority(value):  # value can be a string or an integer
-  # This function can be simplified by handling the string case first, then defaulting to LOW
-  # No need for try/except since we're already handling both string and int cases
-  if isinstance(value, str):
-    return PRIORITY.get(value.upper(), PRIORITY["LOW"])
-  if isinstance(value, int) and value in PRIORITY.values():
-    return value
-  return PRIORITY["LOW"]
+  try:
+    num = int(value)
+    if num in PRIORITY.values():
+      return num
+    else:
+      return PRIORITY["LOW"]
+  except:
+    return PRIORITY["LOW"]
 
 
 def todays_date(): 

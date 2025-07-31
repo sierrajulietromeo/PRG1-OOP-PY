@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from oop import PRIORITY, valid_positive_integer, validate_priority, Task, todays_date, TaskList
+from oop import PRIORITY, valid_positive_integer, validate_priority, todays_date, TaskList, Task 
 
 # pip install pytest in the terminal
 # pytest -v oop_test.py
@@ -22,7 +22,7 @@ def test_valid_positive_integer():
     assert valid_positive_integer(-25) == False
     assert valid_positive_integer(-0) == False
     assert valid_positive_integer(0.0) == False
-    assert valid_positive_integer(1.0) == True
+    assert valid_positive_integer(1.0) == False
 
     # Test invalid cases
     assert valid_positive_integer(1.2) == False
