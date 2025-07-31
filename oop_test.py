@@ -18,13 +18,12 @@ def test_valid_positive_integer():
     assert valid_positive_integer(3) == True
     assert valid_positive_integer('3') == True
 
+    # Test invalid cases
     assert valid_positive_integer(-100) == False
     assert valid_positive_integer(-25) == False
     assert valid_positive_integer(-0) == False
     assert valid_positive_integer(0.0) == False
     assert valid_positive_integer(1.0) == False
-
-    # Test invalid cases
     assert valid_positive_integer(1.2) == False
     assert valid_positive_integer(-1.0) == False
     assert valid_positive_integer('-0') == False
@@ -37,12 +36,12 @@ def test_valid_positive_integer():
 
 # Test validatePriority
 def test_validate_priority():
-    # Test valid priorities using PRIORITY dictionary
-    assert validate_priority(PRIORITY["LOW"]) == PRIORITY["LOW"]
-    assert validate_priority(PRIORITY["MEDIUM"]) == PRIORITY["MEDIUM"]
-    assert validate_priority(PRIORITY["HIGH"]) == PRIORITY["HIGH"]
-    assert validate_priority(PRIORITY["URGENT"]) == PRIORITY["URGENT"]
-    
+    # Test integer priorities
+    assert validate_priority(1) == PRIORITY["LOW"]
+    assert validate_priority(3) == PRIORITY["MEDIUM"]
+    assert validate_priority(5) == PRIORITY["HIGH"]
+    assert validate_priority(7) == PRIORITY["URGENT"]
+       
     # Test string priorities
     assert validate_priority('1') == PRIORITY["LOW"]
     assert validate_priority('3') == PRIORITY["MEDIUM"]
