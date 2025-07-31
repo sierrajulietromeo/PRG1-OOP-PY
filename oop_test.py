@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from oop import PRIORITY, valid_positive_integer, validate_priority, Todo, todays_date, TaskList
+from oop import PRIORITY, valid_positive_integer, validate_priority, Task, todays_date, TaskList
 
 # pip install pytest in the terminal
 # pytest -v oop_test.py
@@ -42,6 +42,12 @@ def test_validate_priority():
     assert validate_priority(PRIORITY["MEDIUM"]) == PRIORITY["MEDIUM"]
     assert validate_priority(PRIORITY["HIGH"]) == PRIORITY["HIGH"]
     assert validate_priority(PRIORITY["URGENT"]) == PRIORITY["URGENT"]
+    
+    # Test string priorities
+    assert validate_priority('1') == PRIORITY["LOW"]
+    assert validate_priority('3') == PRIORITY["MEDIUM"]
+    assert validate_priority('5') == PRIORITY["HIGH"]
+    assert validate_priority('7') == PRIORITY["URGENT"]
 
     # Test invalid priorities
     assert validate_priority(0) == PRIORITY["LOW"]
@@ -61,46 +67,46 @@ def test_todays_date():
     current_time = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
     assert todays_date() == current_time
 
-def test_todo_private_attributes():
+def test_task_private_attributes():
     # Test that private attributes exist
-    todo = Todo("T1", PRIORITY["LOW"])
-    assert hasattr(todo, "_added")
-    assert hasattr(todo, "_title")
-    assert hasattr(todo, "_priority")
+    task = Task("T1", PRIORITY["LOW"])
+    assert hasattr(task, "_added")
+    assert hasattr(task, "_title")
+    assert hasattr(task, "_priority")
 
-def test_todo_added_property():
+def test_task_added_property():
     # Test that added is a read-only property and has the correct format
-    todo = Todo("T1", PRIORITY["LOW"])
-    assert isinstance(todo.added, str)  # Should be a string in the correct format
+    task = Task("T1", PRIORITY["LOW"])
+    assert isinstance(task.added, str)  # Should be a string in the correct format
 
     # Verify that added is read-only by attempting to set it
     with pytest.raises(AttributeError):
-        todo.added = "02/01/2024 00:00:00"
+        task.added = "02/01/2024 00:00:00"
 
-def test_todo_title_property():
+def test_task_title_property():
     # Test that title is a read-only property
-    todo = Todo("T1", PRIORITY["LOW"])
-    assert todo.title == "T1"  # Should return the correct title
+    task = Task("T1", PRIORITY["LOW"])
+    assert task.title == "T1"  # Should return the correct title
 
     # Verify that title is read-only by attempting to set it
     with pytest.raises(AttributeError):
-        todo.title = "NEW TITLE"
+        task.title = "NEW TITLE"
 
-def test_todo_priority_property():
+def test_task_priority_property():
     # Test priority getter and setter using PRIORITY dictionary
-    todo = Todo("T1", PRIORITY["LOW"])
-    assert todo.priority == PRIORITY["LOW"]
+    task = Task("T1", PRIORITY["LOW"])
+    assert task.priority == PRIORITY["LOW"]
 
     # Test setting priority to valid values
-    todo.priority = PRIORITY["HIGH"]
-    assert todo.priority == PRIORITY["HIGH"]
+    task.priority = PRIORITY["HIGH"]
+    assert task.priority == PRIORITY["HIGH"]
 
     # Test setting priority to invalid values (should default to LOW)
-    todo.priority = 0
-    assert todo.priority == PRIORITY["LOW"]
+    task.priority = 0
+    assert task.priority == PRIORITY["LOW"]
 
-    todo.priority = 10
-    assert todo.priority == PRIORITY["LOW"]
+    task.priority = 10
+    assert task.priority == PRIORITY["LOW"]
 
 def test_tasklist_methods_exist():
     # Test that TaskList has the required methods
@@ -108,20 +114,20 @@ def test_tasklist_methods_exist():
     assert hasattr(task_list, "add")
     assert hasattr(task_list, "remove")
     assert hasattr(task_list, "list")
-    assert hasattr(task_list, "task")
+    assert hasattr(task_list, "get_task")
 
 def test_tasklist_add_and_list_tasks():
     # Test adding tasks and listing them
     task_list = TaskList()
-    todo1 = Todo("ACME T1", PRIORITY["LOW"])
-    todo2 = Todo("ACME T2", PRIORITY["MEDIUM"])
-    todo3 = Todo("ACME T3", PRIORITY["MEDIUM"])
-    todo4 = Todo("ACME T4", PRIORITY["HIGH"])
+    task1 = Task("ACME T1", PRIORITY["LOW"])
+    task2 = Task("ACME T2", PRIORITY["MEDIUM"])
+    task3 = Task("ACME T3", PRIORITY["MEDIUM"])
+    task4 = Task("ACME T4", PRIORITY["HIGH"])
 
-    assert task_list.add(todo1) == 1
-    assert task_list.add(todo2) == 2
-    assert task_list.add(todo3) == 3
-    assert task_list.add(todo4) == 4
+    assert task_list.add(task1) == 1
+    assert task_list.add(task2) == 2
+    assert task_list.add(task3) == 3
+    assert task_list.add(task4) == 4
 
     # Verify the list of tasks
     task_list_items = task_list.list()
@@ -134,15 +140,15 @@ def test_tasklist_add_and_list_tasks():
 def test_tasklist_remove_task():
     # Test removing a task
     task_list = TaskList()
-    todo1 = Todo("ACME T1", PRIORITY["LOW"])
-    todo2 = Todo("ACME T2", PRIORITY["MEDIUM"])
-    todo3 = Todo("ACME T3", PRIORITY["MEDIUM"])
-    todo4 = Todo("ACME T4", PRIORITY["HIGH"])
+    task1 = Task("ACME T1", PRIORITY["LOW"])
+    task2 = Task("ACME T2", PRIORITY["MEDIUM"])
+    task3 = Task("ACME T3", PRIORITY["MEDIUM"])
+    task4 = Task("ACME T4", PRIORITY["HIGH"])
 
-    task_list.add(todo1)
-    task_list.add(todo2)
-    task_list.add(todo3)
-    task_list.add(todo4)
+    task_list.add(task1)
+    task_list.add(task2)
+    task_list.add(task3)
+    task_list.add(task4)
 
     # Remove a task and verify
     assert task_list.remove("ACME T4") == True
@@ -151,26 +157,54 @@ def test_tasklist_remove_task():
     # Try to remove a non-existent task
     assert task_list.remove("ACME T5") == False
 
-def test_tasklist_task_access_and_modification():
+def test_tasklist_get_task_access_and_modification():
     # Test accessing and modifying a task
     task_list = TaskList()
-    todo1 = Todo("ACME T1", PRIORITY["LOW"])
-    todo2 = Todo("ACME T2", PRIORITY["MEDIUM"])
+    task1 = Task("ACME T1", PRIORITY["LOW"])
+    task2 = Task("ACME T2", PRIORITY["MEDIUM"])
 
-    task_list.add(todo1)
-    task_list.add(todo2)
+    task_list.add(task1)
+    task_list.add(task2)
 
     # Access and modify a task
-    assert task_list.task("ACME T2").priority == PRIORITY["MEDIUM"]
-    task_list.task("ACME T2").priority = PRIORITY["URGENT"]
-    assert task_list.task("ACME T2").priority == PRIORITY["URGENT"]
+    assert task_list.get_task("ACME T2").priority == PRIORITY["MEDIUM"]
+    task_list.get_task("ACME T2").priority = PRIORITY["URGENT"]
+    assert task_list.get_task("ACME T2").priority == PRIORITY["URGENT"]
 
-def test_tasklist_task_not_found():
+def test_tasklist_get_task_not_found():
     # Test accessing a non-existent task
     task_list = TaskList()
-    todo1 = Todo("ACME T1", PRIORITY["LOW"])
-    task_list.add(todo1)
+    task1 = Task("ACME T1", PRIORITY["LOW"])
+    task_list.add(task1)
 
     # Verify that accessing a non-existent task raises an error
     with pytest.raises(ValueError, match="Task 'ACME T9' Not Found"):
-        task_list.task("ACME T9")
+        task_list.get_task("ACME T9")
+
+def test_tasklist_priority_filtering():
+    # Test priority filtering in list method
+    task_list = TaskList()
+    task1 = Task("ACME T1", PRIORITY["LOW"])
+    task2 = Task("ACME T2", PRIORITY["MEDIUM"])
+    task3 = Task("ACME T3", PRIORITY["MEDIUM"])
+    task4 = Task("ACME T4", PRIORITY["HIGH"])
+
+    task_list.add(task1)
+    task_list.add(task2)
+    task_list.add(task3)
+    task_list.add(task4)
+
+    # Test filtering by MEDIUM priority
+    medium_tasks = task_list.list(PRIORITY["MEDIUM"])
+    assert len(medium_tasks) == 2
+    assert medium_tasks[0][1] == "ACME T2"
+    assert medium_tasks[1][1] == "ACME T3"
+    
+    # Test filtering by HIGH priority
+    high_tasks = task_list.list(PRIORITY["HIGH"])
+    assert len(high_tasks) == 1
+    assert high_tasks[0][1] == "ACME T4"
+    
+    # Test priority=0 returns all tasks
+    all_tasks = task_list.list(0)
+    assert len(all_tasks) == 4

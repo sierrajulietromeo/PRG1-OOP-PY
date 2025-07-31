@@ -1,19 +1,19 @@
 # TaskList App
 
-A minimum viable product (MVP) todo list application implementing an object-oriented design with two main classes.
+A minimum viable product (MVP) Tasklist application implementing an object-oriented design with two main classes.
 
 ## Overview
 
 The application consists of two key classes that work together:
 
-- `TaskList`: Manages a collection of todo items
-- `Todo`: Represents individual todo items
+- `TaskList`: Manages a collection of task items
+- `Task`: Represents individual task items
 
-The relationship between these classes is one-to-many: a single `TaskList` instance can manage multiple `Todo` instances.
+The relationship between these classes is one-to-many: a single `TaskList` instance can manage multiple `Task` instances.
 
 ## Class Diagram
 
-![Todo_TaskList](./images/class_diagram.png)
+![TaskList](./images/class_diagram.png)
 
 ## Helper Functions
 
@@ -53,59 +53,57 @@ validate_priority('A')  # returns 1 (invalid input)
 - **Purpose**: Provides current system datetime
 
 ```python
-todays_date()  # returns e.g., "23/10/2024 09:30:04"
+todays_date()  # returns current date and time e.g., "23/06/2025 09:30:04"
 ```
 
 ## Class Specifications
 
-### `Todo` Class
+### `Task` Class
 
-Represents a single todo item with three private attributes:
+Represents a single task item with three private attributes:
 - `_title`
 - `_priority`
 - `_added` (automatically set on creation)
 
 #### Example Usage:
 ```python
-todo = Todo('Get Cappuccino', PRIORITY['MEDIUM'])
-print(todo.added)    # '23/10/2024 12:26:26'
-print(todo.title)    # 'Get Cappuccino'
-print(todo.priority) # 3
-todo.priority = PRIORITY['URGENT']
-print(todo.priority) # 7
+task = Task('Get Cappuccino', PRIORITY['MEDIUM']) # Instantiates a new instance of Task, named 'task'
+print(task.added)    # '23/10/2024 12:26:26'
+print(task.title)    # 'Get Cappuccino'
+print(task.priority) # 3
+task.priority = PRIORITY['URGENT']
+print(task.priority) # 7
 ```
 
 ### `TaskList` Class
 
-Manages a collection of `Todo` items with five main methods:
+Manages a collection of `Task` items with four main methods:
 
-1. **`__init__()`**: Initialises an empty list to store todos.
+1. **`add(task)`**:
+   - Adds a `Task` instance to the list.
+   - **Returns**: Number of tasks in the list.
 
-2. **`add(todo)`**:
-   - Adds a `Todo` instance to the list.
-   - **Returns**: Number of todos in the list.
-
-3. **`remove(title)`**:
-   - Removes a todo by title (case insensitive).
+2. **`remove(title)`**:
+   - Removes a task by title (case sensitive).
    - **Returns**: boolean (`True` if removed, `False` if not found).
 
-4. **`list(priority=0)`**:
-   - Lists todos, optionally filtered by priority.
+3. **`list(priority=0)`**:
+   - Lists tasks, optionally filtered by priority.
    - **Returns**: List of `[added, title, priority]` lists.
-   - Priority `0` returns all todos.
+   - Priority `0` returns all tasks.
 
-5. **`task(title)`**:
-   - Retrieves a specific todo by title.
-   - **Returns**: `Todo` reference if found.
+4. **`get_task(title)`**:
+   - Retrieves a specific task by title.
+   - **Returns**: `Task` reference if found.
    - **Raises**: `ValueError` if not found (`Task 'title' Not Found`).
 
 #### Example Usage:
 ```python
 task_list = TaskList()
-task_list.add(Todo('Get Cappuccino', PRIORITY['HIGH']))     # returns 1
-task_list.add(Todo('Order Lunch', PRIORITY['MEDIUM']))      # returns 2
-print(task_list.list(PRIORITY['MEDIUM']))                  # returns matching todos
-task_list.task('Order Lunch').priority = PRIORITY['HIGH']   # updates priority
+task_list.add(Task('Get Cappuccino', PRIORITY['HIGH']))     # returns 1
+task_list.add(Task('Order Lunch', PRIORITY['MEDIUM']))      # returns 2
+print(task_list.list(PRIORITY['MEDIUM']))                  # returns matching tasks
+task_list.get_task('Order Lunch').priority = PRIORITY['HIGH']   # updates priority
 print(task_list.remove('Order Lunch'))                     # returns True
 ```
 
@@ -114,7 +112,7 @@ print(task_list.remove('Order Lunch'))                     # returns True
 1. Implement and test helper functions first.
 2. Use private attributes (prefix with `_`) where possible.
 3. Refactor for clarity and efficiency.
-4. Follow standard Python coding conventions (PEP 8).
+4. Follow standard Python coding conventions.
 
 ---
 
@@ -122,4 +120,4 @@ print(task_list.remove('Order Lunch'))                     # returns True
 - Use `@property` decorators for getters and setters.
 - Use `datetime` module for date formatting.
 - Use `raise ValueError` for error handling.
-- Use lists instead of arrays for storing todos.
+- Use lists for storing tasks.
