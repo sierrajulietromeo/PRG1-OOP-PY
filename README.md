@@ -120,4 +120,4 @@ print(task_list.remove('Order Lunch'))                     # returns True
 - Use `@property` decorators for getters and setters.
 - Use `datetime` module for date formatting.
 - Use `raise ValueError` for error handling.
-- Use lists for storing tasks.
+- Use a list for storing tasks.
